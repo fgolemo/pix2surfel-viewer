@@ -14,11 +14,10 @@ import Geometry from './helpers/geometry';
 import Stats from './helpers/stats';
 
 // Model
-import Texture from './model/texture';
 import Model from './model/model';
 
 // Managers
-import Interaction from './managers/interaction';
+// import Interaction from './managers/interaction';
 import DatGUI from './managers/datGUI';
 
 // data
@@ -36,10 +35,9 @@ export default class Main {
 
     // Main scene creation
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(Config.fog.color, Config.fog.near);
 
     // Get Device Pixel Ratio first for retina
-    if(window.devicePixelRatio) {
+    if (window.devicePixelRatio) {
       Config.dpr = window.devicePixelRatio;
     }
 
@@ -61,42 +59,24 @@ export default class Main {
     this.geometry.place([0, -20, 0], [Math.PI / 2, 0, 0]);
 
     // Set up rStats if dev environment
-    if(Config.isDev && Config.isShowingStats) {
+    if (Config.isDev && Config.isShowingStats) {
       this.stats = new Stats(this.renderer);
       this.stats.setUp();
     }
 
-    // Instantiate texture class
-    this.texture = new Texture();
+    this.manager = new THREE.LoadingManager();
 
-    // Start loading the textures and then go on to load the model after the texture Promises have resolved
-    this.texture.load().then(() => {
-      this.manager = new THREE.LoadingManager();
+    this.model = new Model(this.scene, this.manager);
+    this.model.load();
+    // Add dat.GUI controls if dev
+    if (Config.isDev) {
+      new DatGUI(this, this.model.obj);
+    }
 
-      // Textures loaded, load model
-      this.model = new Model(this.scene, this.manager, this.texture.textures);
-      this.model.load();
+    // Everything is now fully loaded
+    Config.isLoaded = true;
+    this.container.querySelector('#loading').style.display = 'none';
 
-      // onProgress callback
-      this.manager.onProgress = (item, loaded, total) => {
-        console.log(`${item}: ${loaded} ${total}`);
-      };
-
-      // All loaders done now
-      this.manager.onLoad = () => {
-        // Set up interaction manager with the app now that the model is finished loading
-        new Interaction(this.renderer.threeRenderer, this.scene, this.camera.threeCamera, this.controls.threeControls);
-
-        // Add dat.GUI controls if dev
-        if(Config.isDev) {
-          new DatGUI(this, this.model.obj);
-        }
-
-        // Everything is now fully loaded
-        Config.isLoaded = true;
-        this.container.querySelector('#loading').style.display = 'none';
-      };
-    });
 
     // Start render which does not wait for model fully loaded
     this.render();
@@ -104,7 +84,7 @@ export default class Main {
 
   render() {
     // Render rStats if Dev
-    if(Config.isDev && Config.isShowingStats) {
+    if (Config.isDev && Config.isShowingStats) {
       Stats.start();
     }
 
@@ -112,7 +92,7 @@ export default class Main {
     this.renderer.render(this.scene, this.camera.threeCamera);
 
     // rStats has finished determining render call now
-    if(Config.isDev && Config.isShowingStats) {
+    if (Config.isDev && Config.isShowingStats) {
       Stats.end();
     }
 

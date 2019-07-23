@@ -36,19 +36,6 @@ export default class DatGUI {
 
       this.controls.enableRotate = true;
     });
-    const cameraFogColorGui = cameraFolder.addColor(Config.fog, 'color').name('Fog Color');
-    cameraFogColorGui.onChange((value) => {
-      main.scene.fog.color.setHex(value);
-    });
-    const cameraFogNearGui = cameraFolder.add(Config.fog, 'near', 0.000, 0.010).name('Fog Near');
-    cameraFogNearGui.onChange((value) => {
-      this.controls.enableRotate = false;
-
-      main.scene.fog.density = value;
-    });
-    cameraFogNearGui.onFinishChange(() => {
-      this.controls.enableRotate = true;
-    });
 
 
     /* Controls */
@@ -65,20 +52,6 @@ export default class DatGUI {
       this.controls.enableRotate = true;
     });
 
-
-    /* Mesh */
-    const meshFolder = gui.addFolder('Mesh');
-    meshFolder.add(Config.mesh, 'translucent', true).name('Translucent').onChange((value) => {
-      if(value) {
-        mesh.material.transparent = true;
-        mesh.material.opacity = 0.5;
-      } else {
-        mesh.material.opacity = 1.0;
-      }
-    });
-    meshFolder.add(Config.mesh, 'wireframe', true).name('Wireframe').onChange((value) => {
-      mesh.material.wireframe = value;
-    });
 
 
     /* Lights */

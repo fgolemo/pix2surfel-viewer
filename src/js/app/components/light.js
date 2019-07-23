@@ -38,8 +38,8 @@ export default class Light {
     this.directionalLight.shadow.mapSize.height = Config.shadow.mapHeight;
 
     // Shadow camera helper
-    this.directionalLightHelper = new THREE.CameraHelper(this.directionalLight.shadow.camera);
-    this.directionalLightHelper.visible = Config.shadow.helperEnabled;
+    // this.directionalLightHelper = new THREE.CameraHelper(this.directionalLight.shadow.camera);
+    // this.directionalLightHelper.visible = Config.shadow.helperEnabled;
 
     // Hemisphere light
     this.hemiLight = new THREE.HemisphereLight(Config.hemiLight.color, Config.hemiLight.groundColor, Config.hemiLight.intensity);
