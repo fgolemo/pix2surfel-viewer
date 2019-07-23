@@ -29,7 +29,7 @@ module.exports = env => {
     devtool = 'hidden-source-map';
     mode = 'production';
     stats = 'none';
-    outputPath = `${__dirname}/build/js`;
+    outputPath = `${__dirname}/build/jSs`;
   }
 
   console.log('Webpack build -');
@@ -39,6 +39,7 @@ module.exports = env => {
   console.log(`    - nodeModulesPath: ${nodeModulesPath}`);
 
   return {
+
     // Here the application starts executing
     // and webpack starts bundling
     entry: [

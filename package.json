@@ -17,8 +17,12 @@
     "build:js": "webpack --env.NODE_ENV=prod --progress --color"
   },
   "dependencies": {
+    "csv-parse": "^4.4.3",
+    "dat.gui": "^0.7.6",
     "es6-promise": "^4.2.5",
+    "save": "^2.4.0",
     "three": "^0.100.0",
+    "three-orbitcontrols": "^2.102.2",
     "tween.js": "^16.6.0"
   },
   "devDependencies": {
