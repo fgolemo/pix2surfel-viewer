@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 
-const OrbitControls = require('three-orbitcontrols');
+let OrbitControls = require('three-orbitcontrols');
 // import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import dat from 'dat.gui';
 
-const gui = new dat.GUI();
+let gui = new dat.GUI();
 
 let options = {
   model: {
@@ -18,15 +18,15 @@ let optOrig = opt.add(options.model, 'original').listen();
 let optRot = opt.add(options.model, 'rotated').listen();
 opt.open();
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-const renderer = new THREE.WebGLRenderer({alpha: true});
+let renderer = new THREE.WebGLRenderer({alpha: true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 renderer.setClearColor(0xffffff, 0);
 
-const controls = new OrbitControls(camera, renderer.domElement);
+let controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.enableZoom = true;
@@ -43,13 +43,13 @@ controls.update();
 var light = new THREE.AmbientLight(0x404040); // soft white light
 scene.add(light);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+let directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 scene.add(directionalLight);
 
-const pointlight = new THREE.PointLight(0xffff00, 1, 100);
+let pointlight = new THREE.PointLight(0xffff00, 1, 100);
 pointlight.position.set(5, 5, 5);
 scene.add(pointlight);
-const pointlight_b = new THREE.PointLight(0xff00ff, 1, 100);
+let pointlight_b = new THREE.PointLight(0xff00ff, 1, 100);
 pointlight_b.position.set(0, -5, -5);
 scene.add(pointlight_b);
 
@@ -90,7 +90,7 @@ function createSplat(x, y, z, r, g, b, scale) {
 
 
 var loader = new THREE.FileLoader();
-const parse = require('csv-parse/lib/sync');
+let parse = require('csv-parse/lib/sync');
 
 let meshHolder = {};
 
@@ -104,7 +104,7 @@ function openCSV(path, name, config) {
     function (data) {
       // output the text to the console
 
-      const records = parse(data, {
+      let records = parse(data, {
         columns: true,
         cast: true
       });
@@ -148,7 +148,7 @@ optRot.onFinishChange(function (value) {
   meshHolder["rotated"].visible = value;
 });
 
-const animate = function () {
+let animate = function () {
   requestAnimationFrame(animate);
 
   // cube.rotation.x += 0.01;

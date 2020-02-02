@@ -3,7 +3,8 @@ const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+// const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
 // Paths
@@ -29,7 +30,7 @@ module.exports = env => {
     devtool = 'hidden-source-map';
     mode = 'production';
     stats = 'none';
-    outputPath = `${__dirname}/build/jSs`;
+    outputPath = `${__dirname}/build/js`;
   }
 
   console.log('Webpack build -');
@@ -119,7 +120,11 @@ module.exports = env => {
     },
 
     // lets you precisely control what bundle information gets displayed
-    stats,
+    stats: {
+      errors: true,
+      errorDetails: true,
+      warnings: false,
+    },
 
     // enhance debugging by adding meta info for the browser devtools
     // source-map most detailed at the expense of build speed.
@@ -144,7 +149,7 @@ module.exports = env => {
 
     optimization: {
       minimizer: [
-        new UglifyJsPlugin({
+        new TerserPlugin({
           cache: true,
           parallel: true,
           sourceMap: true // set to true if you want JS source maps
