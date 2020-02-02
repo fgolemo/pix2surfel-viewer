@@ -1,22 +1,24 @@
 import * as THREE from 'three';
 
+const {mean, std} = require('mathjs');
 let OrbitControls = require('three-orbitcontrols');
 // import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import dat from 'dat.gui';
+import Dragdropper from "./dragdropper";
 
-let gui = new dat.GUI();
+// let gui = new dat.GUI();
 
-let options = {
-  model: {
-    original: true,
-    rotated: false
-  }
-};
-
-let opt = gui.addFolder('Model');
-let optOrig = opt.add(options.model, 'original').listen();
-let optRot = opt.add(options.model, 'rotated').listen();
-opt.open();
+// let options = {
+//   model: {
+//     original: true,
+//     rotated: false
+//   }
+// };
+//
+// let opt = gui.addFolder('Model');
+// let optOrig = opt.add(options.model, 'original').listen();
+// let optRot = opt.add(options.model, 'rotated').listen();
+// opt.open();
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -59,12 +61,10 @@ scene.add(axesHelper);
 
 function createSplat(x, y, z, r, g, b, scale) {
   let geometry = new THREE.PlaneGeometry(1 * scale, 1 * scale);
-  geometry.lookAt(new THREE.Vector3(0, 0, 10));
+  geometry.lookAt(new THREE.Vector3(0, 0, 1000));
   if (z != 0) {
     z = 1 - z / 5
   }
-
-
   geometry.translate(x - .5, y - .5, z);
   // geometry.translate(x-.5, y-.5, z);
   for (let i in geometry.faces) {
@@ -76,77 +76,90 @@ function createSplat(x, y, z, r, g, b, scale) {
 }
 
 
-// let a = createSplat(1, 0, 0, 1, 0, 0, 1);
-// let b = createSplat(0, 1, 0, 0, 1, 0, 1);
-// let c = createSplat(0, 0, 1, 0, 0, 1, 1);
-// let geo = new THREE.Geometry();
-// geo.merge(a);
-// geo.merge(b);
-// geo.merge(c);
-// let buf = new THREE.BufferGeometry().fromGeometry(geo);
-// let matNormal = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, vertexColors: THREE.FaceColors});
-// let meshNormal = new THREE.Mesh(buf, matNormal);
-// scene.add(meshNormal);
-
-
 var loader = new THREE.FileLoader();
 let parse = require('csv-parse/lib/sync');
 
-let meshHolder = {};
+let dataHolder;
 
-function openCSV(path, name, config) {
+function parseCSV(data) {
+  let records = parse(data, {
+    columns: false,
+    cast: true
+  });
+  let geo = new THREE.Geometry();
+  let counter = 0;
+  let minx = 10000;
+  let maxx = -10000;
+  let miny = 10000;
+  let maxy = -10000;
+  let minz = 10000;
+  let maxz = -10000;
+  let zs = [];
+  records.forEach(function (row) {
+    maxx = Math.max(maxx, row[0]);
+    minx = Math.min(minx, row[0]);
+
+    maxy = Math.max(maxy, row[1]);
+    miny = Math.min(miny, row[1]);
+
+    maxz = Math.max(maxz, row[2]);
+    minz = Math.min(minz, row[2]);
+    zs.push(row[2]);
+  });
+  let meanZ = mean(zs);
+  let stdZ = std(zs);
+  records.forEach(function (row) {
+    let x_norm = 1 - ((row[0] - minx) / (maxx - minx));
+    let y_norm = (row[1] - miny) / (maxy - miny);
+    let z_norm = (row[2] - meanZ) / (stdZ) + minz;
+
+    let a = createSplat(y_norm, x_norm, z_norm, row[3], row[4], row[5], 0.016);
+    geo.merge(a);
+    counter++;
+
+  });
+  // console.log("max x: "+maxx+", max y: "+maxy+", min/max z: "+minz+"/"+maxz);
+  let buf = new THREE.BufferGeometry().fromGeometry(geo);
+  let matNormal = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, vertexColors: THREE.FaceColors});
+  let meshNormal = new THREE.Mesh(buf, matNormal);
+  // meshNormal.visible = config;
+  if (dataHolder !== null) {
+    scene.remove(dataHolder);
+  }
+
+  dataHolder = meshNormal;
+  scene.add(meshNormal);
+  console.log("added", counter);
+  // meshHolder[name] = meshNormal;
+}
+
+function openCSV(path) {
   //load a text file and output the result to the console
   loader.load(
     // resource URL
     path,
 
-    // onLoad callback
     function (data) {
-      // output the text to the console
-
-      let records = parse(data, {
-        columns: true,
-        cast: true
-      });
-      let geo = new THREE.Geometry();
-      let counter = 0;
-      records.forEach(function (row) {
-        // console.log(row);
-        // let a = createSplat(row.x, row.y,1, row.r, row.g, row.b, 0.83);
-        let a = createSplat(row.x, row.y, row.z, row.r, row.g, row.b, 0.0083);
-        geo.merge(a);
-        counter++;
-      });
-      let buf = new THREE.BufferGeometry().fromGeometry(geo);
-      let matNormal = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, vertexColors: THREE.FaceColors});
-      let meshNormal = new THREE.Mesh(buf, matNormal);
-      meshNormal.visible = config;
-      scene.add(meshNormal);
-      console.log("added", counter);
-      meshHolder[name] = meshNormal;
+      parseCSV(data);
     },
 
-    // onProgress callback
     function (xhr) {
       console.log((xhr.loaded / xhr.total * 100) + '% loaded');
     },
 
-    // onError callback
     function (err) {
       console.error('An error happened');
     }
   );
 }
 
-openCSV('/assets/data/data-before2.csv', "normal", options.model.original);
-openCSV('/assets/data/data-merged2.csv', "rotated", options.model.rotated);
+// openCSV('/assets/data/data-test.csv', "normal");
 
-optOrig.onFinishChange(function (value) {
-  meshHolder["normal"].visible = value;
-});
-optRot.onFinishChange(function (value) {
-  meshHolder["rotated"].visible = value;
-});
+// optOrig.onFinishChange(function (value) {
+//   meshHolder["normal"].visible = value;
+// });
+
+let ds = new Dragdropper(parseCSV);
 
 let animate = function () {
   requestAnimationFrame(animate);
@@ -156,5 +169,6 @@ let animate = function () {
 
   renderer.render(scene, camera);
 };
+
 
 animate();

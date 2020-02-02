@@ -21,6 +21,7 @@
     "csv-parse": "^4.8.5",
     "dat.gui": "^0.7.6",
     "es6-promise": "^4.2.5",
+    "mathjs": "^6.6.0",
     "save": "^2.4.0",
     "three": "^0.100.0",
     "three-orbitcontrols": "^2.102.2",
